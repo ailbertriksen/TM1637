@@ -130,6 +130,41 @@ void TM1637Display::showNumberDec(int num, bool leading_zero, uint8_t length, ui
 	setSegments(digits + (4 - length), length, pos);
 }
 
+void TM1637Display::showNumberDecDot(int num, bool leading_zero, uint8_t length, uint8_t pos, int decimal_dot_place)
+{
+	uint8_t digits[4];
+	const static int divisors[] = { 1, 10, 100, 1000 };
+	bool leading = true;
+
+	for(int8_t k = 0; k < 4; k++) {
+	    int divisor = divisors[4 - 1 - k];
+	    int d = num / divisor;
+
+	    if (d == 0) {
+	      if (leading_zero || !leading || (k == 3))
+	        {
+		     digits[k] = encodeDigit(d);
+		     if (decimal_dot_place==k)
+		     digits[k] += 0b10000000;
+		}
+	      else
+	        digits[k] = 0;
+	     if (decimal_dot_place==k)
+	     digits[k] += 0b10000000;
+	    }
+	    else {
+	        digits[k] = encodeDigit(d);
+	        num -= d * divisor;
+	        leading = false;
+	     if (decimal_dot_place==k)
+	     digits[k] += 0b10000000;
+	    }
+	}
+
+	setSegments(digits + (4 - length), length, pos);
+}
+
+
 void TM1637Display::bitDelay()
 {
 	delayMicroseconds(50);
